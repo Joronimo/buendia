@@ -103,11 +103,21 @@ jobs:
               git config --global user.email "zestybuendia@gmail.com"
 
       - run:
-          name: Install apt-utils
-          command: sudo apt-get update && sudo apt-get -y install apt-utils
+          name: Install apt-utils and sudo
+          command: sudo apt-get update && sudo apt-get -y install apt-utils sudo
 
       - run:
-          name: Update the package archive
+          name: Download the latest Java dependencies
+          command: sudo tools/download_java_deps builds/packages/java
+
+      - run:
+          name: Update the Java package suite
+          command: |
+              tools/index_debs builds/packages unstable java
+              tools/index_debs builds/packages stable java
+
+      - run:
+          name: Update the overall package archive
           command: tools/update_apt_archive builds/packages ${SOURCE_BRANCH} /tmp/artifacts/packages
 
       - save_cache:
