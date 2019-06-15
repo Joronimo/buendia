@@ -60,6 +60,17 @@ jobs:
       - image: circleci/buildpack-deps:stretch
 
     steps:
+      - run:
+          name: Determine build branch
+          # Decide which branch of projectbuendia/buendia to build from, by
+          # checking $BUENDIA_BRANCH and then falling back to $CIRCLE_BRANCH.
+          #
+          # See `tools/rebuild_apt_repo` for a usage example.
+          #
+          # https://circleci.com/docs/2.0/env-vars/#using-bash_env-to-set-environment-variables
+          command: |
+              echo "export SOURCE_BRANCH=${BUENDIA_BRANCH:-$CIRCLE_BRANCH}" >> $BASH_ENV
+
       - checkout # check out the code in the project directory
 
       - attach_workspace:
@@ -97,7 +108,7 @@ jobs:
 
       - run:
           name: Update the package archive
-          command: tools/update_apt_archive builds/packages ${CIRCLE_BRANCH} /tmp/artifacts/packages
+          command: tools/update_apt_archive builds/packages ${SOURCE_BRANCH} /tmp/artifacts/packages
 
       - save_cache:
           key: buendia-builds-v1-{{ .Branch }}-{{ .Revision }}
